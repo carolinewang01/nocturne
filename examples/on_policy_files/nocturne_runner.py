@@ -31,20 +31,18 @@ def make_train_env(cfg):
     """Construct a training environment."""
 
     def get_env_fn(rank):
-
         def init_env():
             env = create_ppo_env(cfg, rank)
             # TODO(eugenevinitsky) implement this
             env.seed(cfg.seed + rank * 1000)
             return env
-
         return init_env
 
-    if cfg.algo.n_rollout_threads == 1:
+    if cfg.algorithm.n_rollout_threads == 1:
         return DummyVecEnv([get_env_fn(0)])
     else:
         return SubprocVecEnv(
-            [get_env_fn(i) for i in range(cfg.algo.n_rollout_threads)])
+            [get_env_fn(i) for i in range(cfg.algorithm.n_rollout_threads)])
 
 
 def make_eval_env(cfg):
@@ -60,11 +58,11 @@ def make_eval_env(cfg):
 
         return init_env
 
-    if cfg.algo.n_eval_rollout_threads == 1:
+    if cfg.algorithm.n_eval_rollout_threads == 1:
         return DummyVecEnv([get_env_fn(0)])
     else:
         return SubprocVecEnv(
-            [get_env_fn(i) for i in range(cfg.algo.n_eval_rollout_threads)])
+            [get_env_fn(i) for i in range(cfg.algorithm.n_eval_rollout_threads)])
 
 
 def make_render_env(cfg):
@@ -93,11 +91,15 @@ class NocturneSharedRunner(Runner):
     def __init__(self, config):
         """Initialize."""
         super(NocturneSharedRunner, self).__init__(config)
-        self.cfg = config['cfg.algo']
+        self.cfg = config['cfg.algorithm']
         self.render_envs = config['render_envs']
+        print("IN NOCTURNE RUNNER.INIT: ENV RESET OBS SHAPE ", self.envs.reset().shape)
+
 
     def run(self):
         """Run the training code."""
+        print("IN NOCTURNE RUNNER.RUN: ENV RESET OBS SHAPE ", self.envs.reset().shape)
+
         self.warmup()
 
         start = time.time()
@@ -174,8 +176,8 @@ class NocturneSharedRunner(Runner):
                 self.eval(total_num_steps)
 
             # save videos
-            if episode % self.cfg.render_interval == 0:
-                self.render(total_num_steps)
+            # if episode % self.cfg.render_interval == 0:
+            #     self.render(total_num_steps)
 
     def warmup(self):
         """Initialize the buffers."""
@@ -189,7 +191,9 @@ class NocturneSharedRunner(Runner):
                                                             axis=1)
         else:
             share_obs = obs
-
+        print("OBS SHAPE ", obs.shape)
+        print("SHARE OBS SHAPE ", share_obs.shape)
+        print("BUFFER SHARE OBS SHAPE ", self.buffer.share_obs[0].shape)
         self.buffer.share_obs[0] = share_obs.copy()
         self.buffer.obs[0] = obs.copy()
 
@@ -453,6 +457,10 @@ class NocturneSharedRunner(Runner):
 @hydra.main(config_path='../../cfgs/', config_name='config')
 def main(cfg):
     """Run the on-policy code."""
+    print("TYPE CFG", type(cfg))
+    print("CFG KEYS ", cfg.keys())
+    # print("CFG ALGORITH ", cfg.algorithmrithm)
+    # print("CFG ALGORITHM NAME ", cfg.algorithmrithm_name)
     set_display_window()
     logdir = Path(os.getcwd())
     if cfg.wandb_id is not None:
@@ -488,48 +496,49 @@ def main(cfg):
         if not logdir.exists():
             os.makedirs(str(logdir))
 
-    if cfg.algo.algorithm_name == "rmappo":
-        assert (cfg.algo.use_recurrent_policy
-                or cfg.algo.use_naive_recurrent_policy), (
+    if cfg.algorithm.algorithm_name == "rmappo":
+        assert (cfg.algorithm.use_recurrent_policy
+                or cfg.algorithm.use_naive_recurrent_policy), (
                     "check recurrent policy!")
-    elif cfg.algo.algorithm_name == "mappo":
-        assert (not cfg.algo.use_recurrent_policy
-                and not cfg.algo.use_naive_recurrent_policy), (
+    elif cfg.algorithm.algorithm_name == "mappo":
+        assert (not cfg.algorithm.use_recurrent_policy
+                and not cfg.algorithm.use_naive_recurrent_policy), (
                     "check recurrent policy!")
     else:
         raise NotImplementedError
 
     # cuda
-    if 'cpu' not in cfg.algo.device and torch.cuda.is_available():
+    if 'cpu' not in cfg.algorithm.device and torch.cuda.is_available():
         print("choose to use gpu...")
-        device = torch.device(cfg.algo.device)
-        torch.set_num_threads(cfg.algo.n_training_threads)
-        # if cfg.algo.cuda_deterministic:
+        device = torch.device(cfg.algorithm.device)
+        torch.set_num_threads(cfg.algorithm.n_training_threads)
+        # if cfg.algorithm.cuda_deterministic:
         #     import torch.backends.cudnn as cudnn
         #     cudnn.benchmark = False
         #     cudnn.deterministic = True
     else:
         print("choose to use cpu...")
         device = torch.device("cpu")
-        torch.set_num_threads(cfg.algo.n_training_threads)
+        torch.set_num_threads(cfg.algorithm.n_training_threads)
 
     setproctitle.setproctitle(
-        str(cfg.algo.algorithm_name) + "-" + str(cfg.experiment))
+        str(cfg.algorithm.algorithm_name) + "-" + str(cfg.experiment))
 
     # seed
-    torch.manual_seed(cfg.algo.seed)
-    torch.cuda.manual_seed_all(cfg.algo.seed)
-    np.random.seed(cfg.algo.seed)
+    torch.manual_seed(cfg.algorithm.seed)
+    torch.cuda.manual_seed_all(cfg.algorithm.seed)
+    np.random.seed(cfg.algorithm.seed)
 
     # env init
     envs = make_train_env(cfg)
+    print("ENV RESET OBS SHAPE ", envs.reset().shape)
     eval_envs = make_eval_env(cfg)
     render_envs = make_render_env(cfg)
     # TODO(eugenevinitsky) hacky
     num_agents = envs.reset().shape[1]
 
     config = {
-        "cfg.algo": cfg.algo,
+        "cfg.algorithm": cfg.algorithm,
         "envs": envs,
         "eval_envs": eval_envs,
         "render_envs": render_envs,
@@ -544,7 +553,7 @@ def main(cfg):
 
     # post process
     envs.close()
-    if cfg.algo.use_eval and eval_envs is not envs:
+    if cfg.algorithm.use_eval and eval_envs is not envs:
         eval_envs.close()
 
     if cfg.wandb:

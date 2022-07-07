@@ -9,10 +9,11 @@ experiment: intersection
 env: my_custom_multi_env_v1 # name of the env, hardcoded for now
 
 # WANDB things
-wandb: True
+wandb: False
 wandb_project: nocturne4
 wandb_id: null
 wandb_group: ${experiment}
+wandb_name: adamarl_nocturne
 
 # one of the agents will be randomly tagged as the 
 # agent that we control, the rest of the agents will
@@ -100,7 +101,7 @@ subscriber:
   # if true, we return an observation for agents that have exited the system
   # as well as returning an observation for the extra agents if the number of
   # agents in the system is less than max_num_vehicles
-  keep_inactive_agents: False
+  keep_inactive_agents: True
   # for values greater than 1, we will stack inputs together
   n_frames_stacked: 1
 

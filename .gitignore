@@ -29,7 +29,7 @@ algos/gcsl/exp_local/*
 # log files
 checkpoint/
 logs/
-
+test/
 # binary
 *.so
 

@@ -107,6 +107,7 @@ def main(args):
     # create exp dir
     time_str = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     exp_dir = Path.cwd() / Path('train_logs') / time_str
+    print("EXP DIR IS ", exp_dir)
     exp_dir.mkdir(parents=True, exist_ok=True)
 
     # save configs

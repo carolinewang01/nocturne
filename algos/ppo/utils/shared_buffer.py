@@ -47,10 +47,12 @@ class SharedReplayBuffer(object):
         if type(share_obs_shape[-1]) == list:
             share_obs_shape = share_obs_shape[:1]
 
+        print("NUM AGENTS IN SHARED BUFFER ", num_agents)
         self.share_obs = np.zeros(
             (self.episode_length + 1, self.n_rollout_threads, num_agents,
              *share_obs_shape),
             dtype=np.float32)
+        print("SHARE OBS INIT SHAPE ", self.share_obs.shape)
         self.obs = np.zeros((self.episode_length + 1, self.n_rollout_threads,
                              num_agents, *obs_shape),
                             dtype=np.float32)

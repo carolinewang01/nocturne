@@ -279,6 +279,7 @@ class BaseEnv(Env):
         # fill in the missing observations if we should be doing so
         if self.cfg['subscriber']['keep_inactive_agents']:
             # force all vehicles done to be false since they should persist through the episode
+            # TODO: DISCUSS WITH ELAD - what should we do in case vehicles are done? Should they persist in the scene?
             done_dict = {key: False for key in self.all_vehicle_ids}
             for key in self.all_vehicle_ids:
                 if key not in obs_dict.keys():

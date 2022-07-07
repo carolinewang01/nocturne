@@ -24,7 +24,8 @@ class Runner(object):
 
     def __init__(self, config):
 
-        self.all_args = config['cfg.algo']
+        # self.all_args = config['cfg.algo']
+        self.all_args = config['cfg.algorithm']
         self.envs = config['envs']
         self.eval_envs = config['eval_envs']
         self.device = config['device']
@@ -93,6 +94,7 @@ class Runner(object):
                                  device=self.device)
 
         # buffer
+        print("NUM AGENTS IN BASE RUNNER", self.num_agents)
         self.buffer = SharedReplayBuffer(self.all_args, self.num_agents,
                                          self.envs.observation_space[0],
                                          share_observation_space,
