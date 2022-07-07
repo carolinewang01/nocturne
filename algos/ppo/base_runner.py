@@ -68,7 +68,7 @@ class Runner(object):
             self.log_dir = str(self.run_dir / 'logs')
             if not os.path.exists(self.log_dir):
                 os.makedirs(self.log_dir)
-            self.writter = SummaryWriter(self.log_dir)
+            self.writer = SummaryWriter(self.log_dir)
             self.save_dir = str(self.run_dir / 'models')
             if not os.path.exists(self.save_dir):
                 os.makedirs(self.save_dir)
@@ -165,7 +165,8 @@ class Runner(object):
             if self.use_wandb:
                 wandb.log({k: v}, step=total_num_steps)
             else:
-                self.writter.add_scalars(k, {k: v}, total_num_steps)
+                # self.writer.add_scalars(k, {k: v}, total_num_steps)
+                self.writer.add_scalar(k, v, total_num_steps)
 
     def log_env(self, env_infos, total_num_steps):
         """
@@ -178,5 +179,6 @@ class Runner(object):
                 if self.use_wandb:
                     wandb.log({k: np.mean(v)}, step=total_num_steps)
                 else:
-                    self.writter.add_scalars(k, {k: np.mean(v)},
-                                             total_num_steps)
+                    # self.writer.add_scalars(k, {k: np.mean(v)},
+                                             # total_num_steps)
+                    self.writer.add_scalar(k, np.mean(v), total_num_steps)
