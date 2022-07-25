@@ -535,7 +535,9 @@ def main(cfg):
     eval_envs = make_eval_env(cfg)
     render_envs = make_render_env(cfg)
     # TODO(eugenevinitsky) hacky
-    num_agents = envs.reset().shape[1]
+    # num_agents = envs.reset().shape[1]
+    # TODO: hacky; only works for a single rollout thread
+    num_agents = len(envs.observation_space)
 
     config = {
         "cfg.algorithm": cfg.algorithm,

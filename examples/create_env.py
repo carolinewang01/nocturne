@@ -13,20 +13,23 @@ from nocturne.envs.wrappers import create_env
 @hydra.main(config_path="../cfgs/", config_name="config")
 def create_rl_env(cfg):
     """Test step and rendering functions."""
-    set_display_window()
+    disp = set_display_window()
+    print("CREATED DISP")
     env = create_env(cfg)
+    print("CREATED ENV")
     _ = env.reset()
+    print("RESET ENV")
     # quick check that rendering works
-    # _ = env.scenario.getConeImage(
-    #     env.scenario.getVehicles()[0],
-    #     # how far the agent can see
-    #     view_dist=cfg['subscriber']['view_dist'],
-    #     # the angle formed by the view cone
-    #     view_angle=cfg['subscriber']['view_angle'],
-    #     # the agent's head angle
-    #     head_angle=0.0,
-    #     # whether to draw the goal position in the image
-    #     draw_target_position=False)
+    _ = env.scenario.getConeImage(
+        env.scenario.getVehicles()[0],
+        # how far the agent can see
+        view_dist=cfg['subscriber']['view_dist'],
+        # the angle formed by the view cone
+        view_angle=cfg['subscriber']['view_angle'],
+        # the agent's head angle
+        head_angle=0.0,
+        # whether to draw the goal position in the image
+        draw_target_position=False)
     for _ in range(80):
         # grab the list of vehicles that actually need to
         # move some distance to get to their goal
@@ -43,12 +46,14 @@ def create_rl_env(cfg):
             for veh in moving_vehs
 
         })
-        print("CONTROLLED VEHICLES ", len(env.controlled_vehicles))
-        print("NUM CARS IN OBS ", len(obs.keys()))
+        # print("CONTROLLED VEHICLES ", len(env.controlled_vehicles))
+        # print("NUM CARS IN OBS ", len(obs.keys()))
         # print("MAX CARS CTRLLED ", max(obs.keys()))
         # print("MOVING VEHICLES", moving_vehs)
         # print("ENV IS ")
         # import pdb; pdb.set_trace()
+    # disp.stop()
+
 
 if __name__ == '__main__':
     create_rl_env()

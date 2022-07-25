@@ -48,5 +48,10 @@ def get_default_scenario_dict():
 def set_display_window():
     """Set a virtual display for headless machines."""
     if "DISPLAY" not in os.environ:
+        print("SETTING DISPLAY")
         disp = Display()
         disp.start()
+
+        # disp = Display()
+        # disp.start()
+        return disp

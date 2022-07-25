@@ -30,15 +30,17 @@ class OnPolicyPPOWrapper(object):
         self.steering_discretization = self._env.steering_discretization
         self.head_angle_discretization = self._env.head_angle_discretization
 
-        self.accel_grid = self._env.accel_grid
-        self.steering_grid = self._env.steering_grid
-        self.head_angle_grid = self._env.head_angle_grid
+        # self.accel_grid = self._env.accel_grid
+        # self.steering_grid = self._env.steering_grid
+        # self.head_angle_grid = self._env.head_angle_grid
 
         self._env.reset() # compute controlled vehicles
-        self.n = len(self._env.controlled_vehicles)
-        print("NUM ENV CTRLLED VEHICLES ARE ", self.n)
+        # self.n = len(self._env.controlled_vehicles)
+        self.n = len(self._env.all_vehicle_ids)
+        print("NUM ENV CTRLLED VEHICLES ARE ", self._env.controlled_vehicles)
+
         print("NUM EXPERT CTRLLED VEHICLES ARE ", len(self._env.expert_controlled_vehicles))
-        print("ALL VEHICLE IDES ", len(self._env.all_vehicle_ids))
+        print("ALL VEHICLE IDS ", len(self._env.all_vehicle_ids))
         print(("SINGLE AGENT MODE "), self._env.single_agent_mode)
         print("ENV VEHICLES ", self._env.__dict__.keys())
         obs_dict = self.reset()
@@ -56,7 +58,6 @@ class OnPolicyPPOWrapper(object):
     def observation_space(self):
         """See superclass."""
         return [
-            # self._env.observation_space
             Box(low=-np.inf, high=np.inf, shape=self.feature_shape)
             for _ in range(self.n)
         ]
@@ -65,9 +66,7 @@ class OnPolicyPPOWrapper(object):
     def action_space(self):
         """See superclass."""
         return [Discrete(self.accel_discretization * self.steering_discretization * self.head_angle_discretization) for _ in range(self.n)]
-
         # return [Discrete(self.action_discretization**2) for _ in range(self.n)]
-        # return [self._env.action_space for _ in range(self.n)]
 
     def step(self, actions):
         """Convert returned dicts to lists."""
@@ -78,6 +77,7 @@ class OnPolicyPPOWrapper(object):
                 action = np.argmax(action_vec)
             else:
                 action = action_vec[0]
+
             # accel_action = self.accel_grid[int(action //
             #                                    self.action_discretization)]
             # steering_action = self.steering_grid[action %
@@ -87,7 +87,7 @@ class OnPolicyPPOWrapper(object):
             #     'turn': steering_action
             # }
             agent_actions[agent_id] = action
-            
+
         next_obses, rew, done, info = self._env.step(agent_actions)
         obs_n = []
         rew_n = []

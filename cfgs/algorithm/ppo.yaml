@@ -11,7 +11,7 @@ num_env_steps: 1e8 # Number of environment steps to train
 wandb: ${wandb}
 use_obs_instead_of_state: True # Whether to use global state or concatenated obs
 episode_length: ${episode_length} # Max length for any episode
-share_policy: True # Whether all agents share the same policy
+# share_policy: True # Whether all agents share the same policy
 use_centralized_V: False # Whether to use a centralized value function
 stacked_frames: 1 # number of stacked observations
 use_stacked_frames: True # whether to use stacked frames
