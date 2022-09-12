@@ -530,6 +530,9 @@ def main(cfg):
     np.random.seed(cfg.algorithm.seed)
 
     # env init
+    # TODO(eugenevinitsky) this code requires a fixed number of agents but this
+    # should be done by overriding in the hydra config rather than here
+    cfg.subscriber.keep_inactive_agents = True
     envs = make_train_env(cfg)
     print("ENV RESET OBS SHAPE ", envs.reset().shape)
     eval_envs = make_eval_env(cfg)
@@ -540,7 +543,7 @@ def main(cfg):
     num_agents = len(envs.observation_space)
 
     config = {
-        "cfg.algorithm": cfg.algorithm,
+        "cfg.algo": cfg.algorithm,
         "envs": envs,
         "eval_envs": eval_envs,
         "render_envs": render_envs,

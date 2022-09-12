@@ -1,6 +1,6 @@
 # Nocturne
 
-Nocturne is a 2D driving simulator, built in C++ for speed and exported as a Python library.
+Nocturne is a 2D, partially observed, driving simulator, built in C++ for speed and exported as a Python library.
 
 It is currently designed to handle traffic scenarios from the [Waymo Open Dataset](https://github.com/waymo-research/waymo-open-dataset), and with some work could be extended to support different driving datasets. Using the Python library `nocturne`, one is able to train controllers for AVs to solve various tasks from the Waymo dataset, which we provide as a benchmark, then use the tools we offer to evaluate the designed controllers.
 
@@ -15,6 +15,8 @@ Using this rich data source, Nocturne contains a wide range of scenarios whose s
 Nocturne features a rich variety of scenes, ranging from parking lots, to merges, to roundabouts, to unsignalized intersections.
 
 ![Intersection Scene with Obscured View](./docs/readme_files/nocturne_3_by_3_scenes.gif)
+
+More videos can be found [here](https://www.nathanlct.com/research/nocturne).
 
 The corresponding paper is available at: [https://arxiv.org/abs/2206.09889](https://arxiv.org/abs/2206.09889). Please cite the paper and not the GitHub repository, using the following citation:
 
@@ -41,6 +43,7 @@ Run `cmake --version` to see whether CMake is already installed in your environm
 - `sudo apt-get -y install cmake` (Linux)
 - `brew install cmake` (MacOS)
 
+### All machines besides OS with Mac M1 chip follow instructions below
 Nocturne uses [SFML](https://github.com/SFML/SFML) for drawing and visualization, as well as on [pybind11](https://pybind11.readthedocs.io/en/latest/) for compiling the C++ code as a Python library.
 
 To install SFML:
@@ -50,12 +53,20 @@ To install SFML:
 
 pybind11 is included as a submodule and will be installed in the next step.
 
+### Machines with a Mac M1 chip
+Unfortunately if you have a Mac M1 chip you need to ensure that your SFML version is x86_64 instead of arm64; by default brew will install the arm64 variant. The following instructions will help you do this.
+
+1. Make sure you have rosetta2 installed. You can do this by running `softwareupdate --install-rosetta` from the command line.
+2. Build an x86_64 version of brew (which you alias to brow) using the instructions here: [stackoverflow](https://stackoverflow.com/questions/64951024/how-can-i-run-two-isolated-installations-of-homebrew).
+3. Now, run `brow install sfml`
+then everything will compile fine.
+
 ## Installing Nocturne
 
 Start by cloning the repo:
 
 ```bash
-git clone https://github.com/nathanlct/nocturne.git
+git clone https://github.com/facebookresearch/nocturne.git
 cd nocturne
 ```
 
