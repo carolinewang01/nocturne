@@ -27,13 +27,12 @@ class OnPolicyPPOWrapper(object):
         # tracker used to match observations to actions
         self.agent_ids = []
         self.feature_shape = obs_dict[0].shape
-        self.share_observation_space = [
-            Box(low=-np.inf,
-                high=+np.inf,
-                shape=self.feature_shape,
-                dtype=np.float32) for _ in range(self.n)
-        ]
-
+        self.share_observation_space = [Box(
+            low=-np.inf,
+            high=+np.inf,
+            shape=self.feature_shape,
+            dtype=np.float32) for _ in range(self.n)]
+        
     @property
     def observation_space(self):
         """See superclass."""
@@ -105,4 +104,7 @@ def create_ppo_env(cfg, rank=0):
     print("\n")
     print("CREATING PPO ENV")
     env = BaseEnv(cfg, rank=rank)
-    return OnPolicyPPOWrapper(env, use_images=cfg.img_as_state)
+    wrapped_env = OnPolicyPPOWrapper(env, use_images=cfg.img_as_state)
+    print("ACTION SPACE IS I", wrapped_env.action_space)
+    print("ORIG ENV ACTION SPACE ", wrapped_env._env.action_space)
+    return wrapped_env

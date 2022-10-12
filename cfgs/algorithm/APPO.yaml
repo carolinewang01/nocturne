@@ -1,7 +1,7 @@
 algo: APPO
 experiments_root: null 
                  # If not None, store experiment data in the specified subfolder of train_dir. Useful for groups of experiments (e.g. gridsearch) (default: None)
-train_dir: null
+train_dir: /scratch/cluster/clw4542/marl_results/nocturne_logs
                         # Root for all experiments (default: /private/home/eugenevinitsky/Code/nocturne/examples/train_dir)
                         # if null use the hydra default position
 device: gpu  # CPU training is only recommended for smaller e.g. MLP policies (default: gpu)
@@ -16,6 +16,11 @@ obs_subtract_mean: 0.0 # Observation preprocessing, mean value to subtract from 
 obs_scale: 10.0 # Observation preprocessing, divide observation tensors by this scalar (e.g. 128.0 for 8-bit RGB) (default: 1.0)
 gamma: 0.99 # Discount factor (default: 0.99)
 reward_scale: 1.0
+
+lr_schedule: constant # kl_adaptive_minibatch
+# lr_schedule_kl_threshold: 
+max_entropy_coeff: 0.0 
+
               # Multiply all rewards by this factor before feeding into RL algorithm.Sometimes the overall scale of rewards is too high which makes value estimation a
               # harder regression task.Loss values become too high which requires a smaller learning rate, etc. (default: 1.0)
 reward_clip: 10.0 # Clip rewards between [-c, c]. Default [-10, 10] virtually means no clipping for most envs (default: 10.0)
@@ -94,7 +99,9 @@ num_envs_per_worker: 2
 worker_num_splits: 2
                         # Typically we split a vector of envs into two parts for "double buffered" experience collectionSet this to 1 to disable double buffering. Set this to 3
                         # for triple buffering! (default: 2)
-num_policies: 1
+
+num_policies: 5         # CAROLINE: set equal to the number of max number of agents in env!
+decentralized_learn: True
                         # Number of policies to train jointly (default: 1)
 policy_workers_per_policy: 1
                         # Number of policy workers that compute forward pass (per policy) (default: 1)

@@ -37,6 +37,7 @@ class SharedReplayBuffer(object):
         self._use_popart = args.use_popart
         self._use_valuenorm = args.use_valuenorm
         self._use_proper_time_limits = args.use_proper_time_limits
+        self._use_centralized_V = args.use_centralized_V
 
         obs_shape = get_shape_from_obs_space(obs_space)
         share_obs_shape = get_shape_from_obs_space(cent_obs_space)
@@ -47,16 +48,19 @@ class SharedReplayBuffer(object):
         if type(share_obs_shape[-1]) == list:
             share_obs_shape = share_obs_shape[:1]
 
-        print("NUM AGENTS IN SHARED BUFFER ", num_agents)
-        self.share_obs = np.zeros(
-            (self.episode_length + 1, self.n_rollout_threads, num_agents,
-             *share_obs_shape),
-            dtype=np.float32)
-        print("SHARE OBS INIT SHAPE ", self.share_obs.shape)
         self.obs = np.zeros((self.episode_length + 1, self.n_rollout_threads,
                              num_agents, *obs_shape),
                             dtype=np.float32)
 
+        if self._use_centralized_V:
+            self.share_obs = np.zeros(
+                (self.episode_length + 1, self.n_rollout_threads, num_agents,
+                 *share_obs_shape
+                 ),
+                dtype=np.float32)
+        else:
+            self.share_obs = np.zeros_like(obs)
+        
         self.rnn_states = np.zeros(
             (self.episode_length + 1, self.n_rollout_threads, num_agents,
              self.recurrent_N, self.hidden_size),

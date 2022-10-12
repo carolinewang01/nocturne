@@ -53,8 +53,8 @@ scenario:
   # if there are more objects, the closest ones are prioritized
   # if there are less objects, the features vector is padded with zeros
   max_visible_objects: 16
-  max_visible_road_points: 1000
-  max_visible_traffic_lights: 20
+  max_visible_road_points: 500 # 1000
+  max_visible_traffic_lights: 10 # 20
   max_visible_stop_signs: 4
   # from the set of road points that comprise each polyline, we take
   # every n-th one of these

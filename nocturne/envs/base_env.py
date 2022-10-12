@@ -210,8 +210,8 @@ class BaseEnv(Env):
                     # which makes sense as the episodes are 9 seconds long i.e. we'd have to go more than
                     # 40 m/s to get there
                     rew_dict[veh_id] += rew_cfg.get(
-                        'shaped_goal_distance_scaling',
-                        1.0) * (1 - (goal_pos - obj_pos).norm() /
+                        'shaped_goal_distance_scaling', 1.0) * (
+                        1 - (goal_pos - obj_pos).norm() /
                                 self.goal_dist_normalizers[veh_id]
                                 ) / rew_cfg['reward_scaling']
                 # repeat the same thing for speed and heading
@@ -223,8 +223,8 @@ class BaseEnv(Env):
                                 40.0) / rew_cfg['reward_scaling']
                     else:
                         rew_dict[veh_id] += rew_cfg.get(
-                            'shaped_goal_distance_scaling', 1.0
-                        ) * (1 - np.abs(veh_obj.speed - veh_obj.target_speed) /
+                            'shaped_goal_distance_scaling', 1.0) * (
+                            1 - np.abs(veh_obj.speed - veh_obj.target_speed) /
                              40.0) / rew_cfg['reward_scaling']
                 if rew_cfg['shaped_goal_distance'] and rew_cfg[
                         'heading_target']:

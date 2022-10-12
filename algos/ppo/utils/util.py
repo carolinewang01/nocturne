@@ -43,7 +43,8 @@ def get_shape_from_obs_space(obs_space):
     if obs_space.__class__.__name__ == 'Box':
         obs_shape = obs_space.shape
     elif obs_space.__class__.__name__ == 'list':
-        obs_shape = obs_space
+        obs_space_shapes = [o.shape for o in obs_space ]
+        obs_shape = tuple([sum(x) for x in zip(*obs_space_shapes)])
     else:
         raise NotImplementedError
     return obs_shape

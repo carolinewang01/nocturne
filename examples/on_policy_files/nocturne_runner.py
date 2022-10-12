@@ -152,12 +152,13 @@ class NocturneSharedRunner(Runner):
                 env_infos = {}
                 for agent_id in range(self.num_agents):
                     idv_rews = []
+                    # idv_achieved_goal = []
+                    # idv_vehicles_collided = []
                     for info in infos:
                         if 'individual_reward' in info[agent_id].keys():
                             idv_rews.append(
                                 info[agent_id]['individual_reward'])
-                    agent_k = 'agent%i/individual_rewards' % agent_id
-                    env_infos[agent_k] = idv_rews
+                    env_infos[f"agent{agent_id}/individual_rewards"] = idv_rews
 
                 # TODO(eugenevinitsky) this does not correctly account for the fact that there could be
                 # two episodes in the buffer
@@ -363,6 +364,15 @@ class NocturneSharedRunner(Runner):
                     num_collisions / self.num_agents / self.cfg.eval_episodes
                 },
                 step=total_num_steps)
+            
+        # log to tensorboard
+        test_infos = {
+            "eval_episode_rewards": eval_episode_rewards,
+            "avg_eval_goals_achieved": num_achieved_goals / self.num_agents / self.cfg.eval_episodes,
+            "avg_eval_num_collisions": num_collisions / self.num_agents / self.cfg.eval_episodes
+        }
+        self.log_train(test_infos, total_num_steps)
+
 
     @torch.no_grad()
     def render(self, total_num_steps):
@@ -543,7 +553,7 @@ def main(cfg):
     num_agents = len(envs.observation_space)
 
     config = {
-        "cfg.algo": cfg.algorithm,
+        "cfg.algorithm": cfg.algorithm,
         "envs": envs,
         "eval_envs": eval_envs,
         "render_envs": render_envs,
