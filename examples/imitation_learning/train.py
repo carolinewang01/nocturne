@@ -85,7 +85,7 @@ def main(args):
     # create model
     obj, sample_state, sample_action = next(data_loader)
     #print(obj.shape, sample_state.shape, sample_action.shape)
-    assert False
+    #assert False
     n_states = sample_state.shape[-1]
 
     model_cfg = {
@@ -149,9 +149,9 @@ def main(args):
                       unit='batch'):
             # get states and expert actions
             obj, states, expert_actions = next(data_loader)
-            print(states)
-            print(expert_actions)
-            break
+            #print(states)
+            #print(expert_actions)
+            #break
             states = states.to(args.device)
             expert_actions = expert_actions.to(args.device)
 
