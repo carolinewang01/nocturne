@@ -19,7 +19,7 @@ from tqdm import tqdm
 import wandb
 
 from examples.imitation_learning.model import ImitationAgent
-from examples.imitation_learning.waymo_data_loader import WaymoDataset
+from examples.imitation_learning.waymo_data_loader_wObj import WaymoDataset
 
 
 def set_seed_everywhere(seed):
@@ -83,7 +83,9 @@ def main(args):
         ))
 
     # create model
-    sample_state, _ = next(data_loader)
+    obj, sample_state, sample_action = next(data_loader)
+    #print(obj.shape, sample_state.shape, sample_action.shape)
+    assert False
     n_states = sample_state.shape[-1]
 
     model_cfg = {
@@ -146,7 +148,10 @@ def main(args):
         for i in tqdm(range(args.samples_per_epoch // args.batch_size),
                       unit='batch'):
             # get states and expert actions
-            states, expert_actions = next(data_loader)
+            obj, states, expert_actions = next(data_loader)
+            print(states)
+            print(expert_actions)
+            break
             states = states.to(args.device)
             expert_actions = expert_actions.to(args.device)
 
@@ -245,11 +250,11 @@ def main(args):
                 print('expert: ', expert_idxs[0:10, 2])
             else:
                 print('accel')
-                print('model: ', model_idxs[0][0:10])
-                print('expert: ', expert_idxs[0:10, 0])
-                print('steer')
-                print('model: ', model_idxs[1][0:10])
-                print('expert: ', expert_idxs[0:10, 1])
+                #print('model: ', model_idxs[0][0:10])
+                #print('expert: ', expert_idxs[0:10, 0])
+                #print('steer')
+                #print('model: ', model_idxs[1][0:10])
+                #print('expert: ', expert_idxs[0:10, 1])
 
     print('Done, exp dir is', exp_dir)
 
@@ -258,4 +263,5 @@ def main(args):
 
 
 if __name__ == '__main__':
+    config_path="../../cfgs/imitation/config.yaml"
     main()

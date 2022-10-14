@@ -13,6 +13,7 @@ import numpy as np
 from cfgs.config import ERR_VAL
 from nocturne import Simulation
 
+#TODO - we need to make sure the demonstration ordering is consistent (at least within each scenario)
 
 def _get_waymo_iterator(paths, dataloader_config, scenario_config):
     # if worker has no paths, return an empty iterator
@@ -34,7 +35,7 @@ def _get_waymo_iterator(paths, dataloader_config, scenario_config):
     while True:
         # select a random scenario path
         scenario_path = np.random.choice(paths)
-
+        print(scenario_path)
         # create simulation
         sim = Simulation(str(scenario_path), scenario_config)
         scenario = sim.getScenario()
@@ -58,8 +59,10 @@ def _get_waymo_iterator(paths, dataloader_config, scenario_config):
 
         # iterate over timesteps and objects of interest
         for time in range(tmin, tmax):
+            objlist = []
             for obj in objects_of_interest:
                 # get state
+                objlist.append(obj)
                 ego_state = scenario.ego_state(obj)
                 visible_state = scenario.flattened_visible_state(
                     obj, view_dist=view_dist, view_angle=view_angle)
@@ -123,7 +126,7 @@ def _get_waymo_iterator(paths, dataloader_config, scenario_config):
                 else:
                     state_list.append(state)
                     action_list.append(expert_action)
-
+            print(objlist)
             # step the simulation
             sim.step(dt)
             if initial_warmup > 0:
