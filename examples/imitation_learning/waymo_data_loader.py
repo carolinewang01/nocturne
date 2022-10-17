@@ -126,7 +126,7 @@ def _get_waymo_iterator(paths, dataloader_config, scenario_config):
                 else:
                     state_list.append(state)
                     action_list.append(expert_action)
-            print(objlist)
+            # print(objlist)
             # step the simulation
             sim.step(dt)
             if initial_warmup > 0:

@@ -19,7 +19,8 @@ from tqdm import tqdm
 import wandb
 
 from examples.imitation_learning.model import ImitationAgent
-from examples.imitation_learning.waymo_data_loader_wObj import WaymoDataset
+from examples.imitation_learning.waymo_data_loader import WaymoDataset
+# from examples.imitation_learning.waymo_data_loader_wObj import WaymoDataset
 
 
 def set_seed_everywhere(seed):
@@ -83,8 +84,12 @@ def main(args):
         ))
 
     # create model
-    obj, sample_state, sample_action = next(data_loader)
-    #print(obj.shape, sample_state.shape, sample_action.shape)
+    # obj, sample_state, sample_action = next(data_loader)
+    # sample_state, sample_action = next(data_loader)
+    # print(sample_state.shape, sample_action.shape) # [512, 35110], [512, 3]
+    alist = list(data_loader)
+    print("LIST LEN ", len(alist))
+    import sys; sys.exit(0)
     #assert False
     n_states = sample_state.shape[-1]
 
@@ -149,8 +154,8 @@ def main(args):
                       unit='batch'):
             # get states and expert actions
             obj, states, expert_actions = next(data_loader)
-            #print(states)
-            #print(expert_actions)
+            print("STATES ARE ", states)
+            print("ACTIONS ARE ", expert_actions)
             #break
             states = states.to(args.device)
             expert_actions = expert_actions.to(args.device)
