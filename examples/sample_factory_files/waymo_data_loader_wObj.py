@@ -35,7 +35,7 @@ def _get_waymo_iterator(paths, dataloader_config, scenario_config):
     while True:
         # select a random scenario path
         scenario_path = np.random.choice(paths)
-        print(scenario_path)
+        # print(scenario_path)
         # create simulation
         sim = Simulation(str(scenario_path), scenario_config)
         scenario = sim.getScenario()

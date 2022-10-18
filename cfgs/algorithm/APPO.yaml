@@ -107,7 +107,7 @@ decentralized_learn: True
 use_gail: True
 dataloader_name: custom_waymo_dataloader
 gail_rew_coef: 0.1
-gail_epochs: 5
+gail_epochs: 3
 gail_learning_rate: .001
 
 ######################### MODIFIED BY US #############################
