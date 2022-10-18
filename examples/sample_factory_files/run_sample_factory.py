@@ -26,6 +26,7 @@ python -m sample_factory_examples.enjoy_custom_multi_env --algo=APPO \
 """
 import os
 import sys
+from functools import partial
 
 import hydra
 import numpy as np
@@ -33,10 +34,12 @@ from omegaconf import OmegaConf
 from sample_factory.envs.env_registry import global_env_registry
 from sample_factory.run_algorithm import run_algorithm
 from sample_factory_examples.train_custom_env_custom_model import override_default_params_func
-from sample_factory.algorithms.appo.model_utils import get_obs_shape, EncoderBase, nonlinearity, register_custom_encoder
+from sample_factory.algorithms.appo.model_utils import get_obs_shape, EncoderBase, nonlinearity, register_custom_encoder, register_custom_dataloader
 from torch import nn
+from torch.utils.data import DataLoader
 
 from nocturne.envs.wrappers import create_env
+from examples.sample_factory_files.waymo_data_loader_wObj import WaymoDataset
 
 
 class SampleFactoryEnv():
@@ -303,8 +306,64 @@ def make_custom_multi_env_func(full_env_name, cfg, env_config=None):
     env = create_env(cfg)
     return SampleFactoryEnv(env)
 
+def make_waymo_dataloader(cfg):
+    # TODO: create scenario/dataloader configs
+    # create partial function to allow dataloader to be initialized when needed 
+    # return constructor 
 
-def register_custom_components():
+    # copied from IL train.py, actions_are_positions=False
+    expert_bounds = [[-6, 6], [-0.7, 0.7]] # TODO: why is this only giving 2 set of lower/upper bounds?
+    # actions_bounds = expert_bounds
+    # actions_discretizations = [15, 43]
+    # mean_scalings = [3, 0.7]
+    # std_devs = [0.1, 0.02]
+    dataloader_cfg = {
+        'tmin': 0,
+        'tmax': cfg.episode_length,# 90
+        'view_dist': cfg.view_dist,
+        'view_angle': cfg.view_angle,
+        'dt': cfg.dt,
+        'expert_action_bounds': expert_bounds, # TODO: figure out what this should be!
+        'expert_position': False, # taken from actions_are_positions # TODO: figure out what this does!
+        'state_normalization': 100, # TODO: check how nocturne env does state normalization!
+        'n_stacked_states': cfg.n_stacked_states,
+    }
+    scenario_cfg = cfg.scenario
+    assert type(scenario_cfg) is dict
+    # {
+    #     'start_time': 0,
+    #     'allow_non_vehicles': cfg.allow_non_vehicles,
+    #     'spawn_invalid_objects': True, # ??? seems sus
+    #     'max_visible_road_points': cfg.max_visible_road_points,
+    #     'max_visible_objects': cfg.max_visible_objects,
+    #     'max_visible_traffic_lights': cfg.visible_traffic_lights,
+    #     'max_visible_stop_signs': cfg.visible_stop_signs,
+    #     'sample_every_n': cfg.sample_every_n,
+    #     'road_edge_first': cfg.road_edge_first,
+
+    # }
+    dataset = WaymoDataset(
+        data_path=cfg.scenario_path,
+        file_limit=cfg.num_files,
+        dataloader_config=dataloader_cfg,
+        scenario_config=scenario_cfg,
+    )
+    data_loader_constr = partial(DataLoader, 
+                                 dataset=dataset, 
+                                 num_workers=9,
+                                 pin_memory=True # TODO: check meaning of this
+                                 )
+    # data_loader = iter(
+    #     DataLoader(
+    #         dataset,
+    #         batch_size=args.batch_size,
+    #         num_workers=args.n_cpus,
+    #         pin_memory=True,
+    #     ))
+    # obj, sample_state, sample_action = next(data_loader)
+    return data_loader_constr
+
+def register_custom_components(cfg):
     """Register needed constructors for custom environments."""
     global_env_registry().register_env(
         env_name_prefix='my_custom_multi_env_',
@@ -312,12 +371,13 @@ def register_custom_components():
         override_default_params_func=override_default_params_func,
     )
     register_custom_encoder('custom_env_encoder', CustomEncoder)
+    data_loader_constr = make_waymo_dataloader(cfg)
+    register_custom_dataloader('custom_waymo_dataloader', data_loader_constr)
 
 
 @hydra.main(config_path="../../cfgs/", config_name="config")
 def main(cfg):
     """Script entry point."""
-    register_custom_components()
     # cfg = parse_args()
     # TODO(ev) hacky renaming and restructuring, better to do this cleanly
     cfg_dict = OmegaConf.to_container(cfg, resolve=True)
@@ -344,6 +404,7 @@ def main(cfg):
             self.__dict__.update(adict)
 
     cfg = Bunch(cfg_dict)
+    register_custom_components(cfg)
     status = run_algorithm(cfg)
     return status
 

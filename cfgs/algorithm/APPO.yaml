@@ -104,9 +104,10 @@ worker_num_splits: 2
 num_policies: 5         # CAROLINE: set equal to the number of max number of agents in env (config.yaml)
 decentralized_learn: True
 # note: we hijacked the aux_loss_module functionality to train GAIL
-use_gail: False
+use_gail: True
+dataloader_name: custom_waymo_dataloader
 gail_rew_coef: 0.1
-gail_epochs: 60
+gail_epochs: 5
 gail_learning_rate: .001
 
 ######################### MODIFIED BY US #############################

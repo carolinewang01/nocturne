@@ -19,8 +19,8 @@ from tqdm import tqdm
 import wandb
 
 from examples.imitation_learning.model import ImitationAgent
-from examples.imitation_learning.waymo_data_loader import WaymoDataset
-# from examples.imitation_learning.waymo_data_loader_wObj import WaymoDataset
+# from examples.imitation_learning.waymo_data_loader import WaymoDataset
+from examples.imitation_learning.waymo_data_loader_wObj import WaymoDataset
 
 
 def set_seed_everywhere(seed):
@@ -37,14 +37,14 @@ def main(args):
     """Train an IL model."""
     set_seed_everywhere(args.seed)
     # create dataset and dataloader
-    if args.actions_are_positions:
+    if args.actions_are_positions: # TODO: meaning of these settings?
         expert_bounds = [[-0.5, 3], [-3, 3], [-0.07, 0.07]]
         actions_discretizations = [21, 21, 21]
         actions_bounds = [[-0.5, 3], [-3, 3], [-0.07, 0.07]]
         mean_scalings = [3, 3, 0.07]
         std_devs = [0.1, 0.1, 0.02]
     else:
-        expert_bounds = [[-6, 6], [-0.7, 0.7]]
+        expert_bounds = [[-6, 6], [-0.7, 0.7]] # TODO: why is this only giving 2 set of lower/upper bounds?
         actions_bounds = expert_bounds
         actions_discretizations = [15, 43]
         mean_scalings = [3, 0.7]
@@ -63,11 +63,15 @@ def main(args):
     }
     scenario_cfg = {
         'start_time': 0,
-        'allow_non_vehicles': True,
-        'spawn_invalid_objects': True,
+        'allow_non_vehicles': False,
+        'spawn_invalid_objects': True, # ??? seems sus
         'max_visible_road_points': args.max_visible_road_points,
+        'max_visible_objects': 16,
+        'max_visible_traffic_lights': 20,
+        'max_visible_stop_signs': 4,
         'sample_every_n': 1,
         'road_edge_first': False,
+
     }
     dataset = WaymoDataset(
         data_path=args.path,
@@ -85,11 +89,15 @@ def main(args):
 
     # create model
     # obj, sample_state, sample_action = next(data_loader)
-    # sample_state, sample_action = next(data_loader)
-    # print(sample_state.shape, sample_action.shape) # [512, 35110], [512, 3]
-    alist = list(data_loader)
-    print("LIST LEN ", len(alist))
-    import sys; sys.exit(0)
+    import time
+    start = time.time()
+    for i in range(1):
+        obj, sample_state, sample_action = next(data_loader)
+    end = time.time()
+    print("AVG TIME TO SAMPLE BATCH ", (end - start)/1) # .30 seconds
+    print(sample_state.shape, sample_action.shape) # [512, 35110], [512, 3]
+    import pdb; pdb.set_trace()
+    # import sys; sys.exit(0)
     #assert False
     n_states = sample_state.shape[-1]
 
