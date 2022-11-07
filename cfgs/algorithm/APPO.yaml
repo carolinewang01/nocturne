@@ -59,7 +59,7 @@ use_rnn: True #     Whether to use RNN core in a policy or not (default: True)
 rnn_type: gru #  {gru,lstm}
               #  Type of RNN cell to use if use_rnn is True (default: gru)
 rnn_num_layers: 1 # Number of RNN layers to use if use_rnn is True (default: 1)
-ppo_clip_ratio: 0.1 # We use unbiased clip(x, 1+e, 1/(1+e)) instead of clip(x, 1+e, 1-e) in the paper (default: 0.1)
+ppo_clip_ratio: 0.1 # 0.02  # We use unbiased clip(x, 1+e, 1/(1+e)) instead of clip(x, 1+e, 1-e) in the paper (default: 0.1)
 ppo_clip_value: 1.0 # Maximum absolute change in value estimate until it is clipped. Sensitive to value magnitude (default: 1.0)
 batch_size: 7180 # Minibatch size for SGD (default: 1024)
 num_batches_per_iteration: 1 
@@ -67,7 +67,7 @@ num_batches_per_iteration: 1
 # any higher value will increase the policy lag.But in some specific circumstances it can be beneficial to have a larger macro-batch in order to shuffle
 # and decorrelate the minibatches.Here and throughout the codebase: macro batch is the portion of experience that learner processes per iteration
 # (consisting of 1 or several minibatches) (default: 1)
-ppo_epochs: 1 # Number of training epochs before a new batch of experience is collected (default: 1)
+ppo_epochs: 2 # Number of training epochs before a new batch of experience is collected (default: 1)
 num_minibatches_to_accumulate: -1
 # This parameter governs the maximum number of minibatches the learner can accumulate before further experience collection is stopped.The default value
 # (-1) will set this to 2 * num_batches_per_iteration, so if the experience collection is faster than the training,the learner will accumulate enough
@@ -106,9 +106,9 @@ decentralized_learn: True
 # note: we hijacked the aux_loss_module functionality to train GAIL
 use_gail: True
 dataloader_name: custom_waymo_dataloader
-gail_rew_coef: 0.1
-gail_epochs: 3
-gail_learning_rate: .001
+gail_rew_coef: 0.0005 # 0.1
+gail_epochs: 1
+gail_learning_rate: .000005
 
 ######################### MODIFIED BY US #############################
 

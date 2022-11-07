@@ -16,6 +16,7 @@ from nocturne import Simulation
 #TODO - we need to make sure the demonstration ordering is consistent (at least within each scenario)
 
 def _get_waymo_iterator(paths, dataloader_config, scenario_config):
+    # print("WAYMO ITERATOR CALLED")
     # if worker has no paths, return an empty iterator
     if len(paths) == 0:
         return
@@ -35,7 +36,7 @@ def _get_waymo_iterator(paths, dataloader_config, scenario_config):
     while True:
         # select a random scenario path
         scenario_path = np.random.choice(paths)
-        print(scenario_path)
+        # print(scenario_path)
         # create simulation
         sim = Simulation(str(scenario_path), scenario_config)
         scenario = sim.getScenario()
@@ -129,13 +130,12 @@ def _get_waymo_iterator(paths, dataloader_config, scenario_config):
                     state_list.append(state)
                     action_list.append(expert_action)
                     obj_list.append(obj.getID())
-            #print(objlist)
             # step the simulation
             sim.step(dt)
             if initial_warmup > 0:
                 initial_warmup -= 1
 
-        if len(state_list) > 0:
+        if len(state_list) > 0: # yield the samples 1 at a time from the scenario paths
             temp = list(zip(obj_list, state_list, action_list))
             random.shuffle(temp)
             obj_list, state_list, action_list = zip(*temp)

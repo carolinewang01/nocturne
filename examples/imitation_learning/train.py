@@ -88,17 +88,7 @@ def main(args):
         ))
 
     # create model
-    # obj, sample_state, sample_action = next(data_loader)
-    import time
-    start = time.time()
-    for i in range(1):
-        obj, sample_state, sample_action = next(data_loader)
-    end = time.time()
-    print("AVG TIME TO SAMPLE BATCH ", (end - start)/1) # .30 seconds
-    print(sample_state.shape, sample_action.shape) # [512, 35110], [512, 3]
-    import pdb; pdb.set_trace()
-    # import sys; sys.exit(0)
-    #assert False
+    obj, sample_state, sample_action = next(data_loader)
     n_states = sample_state.shape[-1]
 
     model_cfg = {

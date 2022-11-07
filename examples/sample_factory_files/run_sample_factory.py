@@ -308,36 +308,36 @@ def make_custom_multi_env_func(full_env_name, cfg, env_config=None):
     return SampleFactoryEnv(env)
 
 def make_waymo_dataloader(cfg):
-    # TODO: create scenario/dataloader configs
-    # create partial function to allow dataloader to be initialized when needed 
-    # return constructor 
-
     # copied from IL train.py, actions_are_positions=False
-    expert_bounds = [[-6, 6], [-0.7, 0.7]] # TODO: why is this only giving 2 set of lower/upper bounds?
+    expert_action_bounds = [[-6, 6], [-0.7, 0.7]] # why is this only giving 2 set of lower/upper bounds?
     dataloader_cfg = {
         'tmin': 0,
-        'tmax': cfg.episode_length,# 90
+        'tmax': cfg.episode_length, # previously 90
         'view_dist': cfg.subscriber['view_dist'],
         'view_angle': cfg.subscriber['view_angle'],
         'dt': cfg.dt,
-        'expert_action_bounds': expert_bounds, # TODO: figure out what this should be!
-        'expert_position': False, # taken from actions_are_positions # TODO: figure out what this does!
-        'state_normalization': 100, # TODO: check how nocturne env does state normalization!
+        'expert_action_bounds': expert_action_bounds, # TODO: figure out what this should be!
+        'expert_position': False, # affects how actions are computed
+        'state_normalization': 1, # TODO: check how nocturne env does state normalization!
         'n_stacked_states': cfg.subscriber['n_frames_stacked'],
     }
     scenario_cfg = cfg.scenario
     
-    dataset = WaymoDataset(
-        data_path=cfg.scenario_path,
-        file_limit=5, # cfg.num_files,
-        dataloader_config=dataloader_cfg,
-        scenario_config=scenario_cfg,
-    )
-    data_loader_constr = partial(DataLoader, 
-                                 dataset=dataset, 
-                                 num_workers=0, # appo is already multithreaded which doesn't play well with dataloader
-                                 pin_memory=False, 
-                                 )
+    def data_loader_constr(batch_size:int, device:str):
+        dataset = WaymoDataset(
+            data_path=cfg.scenario_path,
+            file_limit=cfg.num_files,
+            dataloader_config=dataloader_cfg,
+            scenario_config=scenario_cfg,
+            to_gpu=True,
+            device=device
+        )
+        return DataLoader(dataset=dataset, 
+                         num_workers=0, # appo is already multithreaded which doesn't play well with dataloader
+                         pin_memory=False, 
+                         batch_size=batch_size
+                         )
+            
     return data_loader_constr
 
 def register_custom_components(cfg):
