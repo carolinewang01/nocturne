@@ -5,6 +5,8 @@
 """Dataloader for imitation learning in Nocturne."""
 from collections import defaultdict
 import random
+import os
+import json
 
 import torch
 from pathlib import Path
@@ -140,6 +142,7 @@ def _process_scenario(scenario_path, scenario_config, dataloader_config,
                     action_list.append(expert_action)
                     obj_list.append(obj.getID())
             else:
+                
                 state = torch.tensor(state, device=device) 
                 expert_action = torch.tensor(expert_action, device=device) 
 
@@ -179,8 +182,13 @@ def _get_waymo_iterator(paths, dataloader_config, scenario_config,
 
     if state_only:
         temp = list(zip(obj_list_all, state_list_all))
+        # TEMP DEBUG: only return demos corresponding to agent 0
+        temp = [(obj, state) for obj, state in temp if obj == 0]
+
     else:
         temp = list(zip(obj_list_all, state_list_all, action_list_all))
+        # TEMP DEBUG: only return demos corresponding to agent 0
+        temp = [(obj, state, act) for obj, state, act in temp if obj == 0]
 
     while True:
         random.shuffle(temp)
@@ -203,18 +211,29 @@ class WaymoDataset(torch.utils.data.IterableDataset):
                  to_gpu=False, 
                  device=None):
         super(WaymoDataset).__init__()
-
         # save configs
         self.dataloader_config = dataloader_config
         self.scenario_config = scenario_config
         
         # get paths of dataset files (up to file_limit paths)
-        self.file_paths = list(
-            Path(data_path).glob('tfrecord*.json'))[:file_limit]
+        # self.file_paths = list(
+            # Path(data_path).glob('tfrecord*.json'))[:file_limit]
+        with open(os.path.join(data_path,
+                               'valid_files.json')) as file:
+            valid_veh_dict = json.load(file)
+            self.file_paths = list(valid_veh_dict.keys())
+            # sort the files so that we have a consistent order
+            self.file_paths = sorted(self.file_paths)
+
+        if file_limit != -1:
+            self.file_paths = self.file_paths[0:file_limit]
+        self.file_paths = [os.path.join(data_path, file_path) for file_path in self.file_paths]
+
         print(f'WaymoDataset: loading {len(self.file_paths)} files.')
+        print(f"First filepath is {self.file_paths[0]}")
 
         # sort the paths for reproducibility if testing on a small set of files
-        self.file_paths.sort()
+        # self.file_paths.sort()
         self.to_gpu = to_gpu
         self.device = device
 
@@ -222,13 +241,13 @@ class WaymoDataset(torch.utils.data.IterableDataset):
         """Partition files for each worker and return an (state, expert_action) iterable."""
         # get info on current worker process
         worker_info = torch.utils.data.get_worker_info()
-
         if worker_info is None:
             # single-process data loading, return the whole set of files
             return _get_waymo_iterator(self.file_paths, self.dataloader_config,
-                                       self.scenario_config, 
-                                       self.to_gpu, 
-                                       self.device
+                                       self.scenario_config,
+                                       state_only=True, 
+                                       to_gpu=self.to_gpu, 
+                                       device=self.device
                                        )
 
         # distribute a unique set of file paths to each worker process
@@ -237,8 +256,9 @@ class WaymoDataset(torch.utils.data.IterableDataset):
         return _get_waymo_iterator(list(worker_file_paths),
                                    self.dataloader_config,
                                    self.scenario_config,
-                                   self.to_gpu,
-                                   self.device
+                                   state_only=True,
+                                   to_gpu=self.to_gpu,
+                                   device=self.device
                                    )
 
 

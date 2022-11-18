@@ -40,6 +40,7 @@ class BaseEnv(Env):
             self.files = sorted(self.files)
         if cfg['num_files'] != -1:
             self.files = self.files[0:cfg['num_files']]
+        print("NOCTURNE ENV FIRST FILE IS ", self.files[0])
         self.file = self.files[np.random.randint(len(self.files))]
         self.simulation = Simulation(os.path.join(cfg['scenario_path'],
                                                   self.file),
@@ -365,7 +366,8 @@ class BaseEnv(Env):
             ############################################'''
             # ensure that we have no more than max_num_vehicles are controlled
             temp_vehicles = self.scenario.getObjectsThatMoved()
-            np.random.shuffle(temp_vehicles)
+            # Caroline: removed this shuffle for debug purposes
+            # np.random.shuffle(temp_vehicles)
             curr_index = 0
             self.controlled_vehicles = []
             self.expert_controlled_vehicles = []

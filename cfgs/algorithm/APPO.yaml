@@ -101,7 +101,7 @@ worker_num_splits: 2
                         # for triple buffering! (default: 2)
 
 ######################### MODIFIED BY US #############################
-num_policies: 5         # CAROLINE: set equal to the number of max number of agents in env (config.yaml)
+num_policies: 1         # CAROLINE: set equal to the number of max number of agents in env (config.yaml)
 decentralized_learn: True
 # note: we hijacked the aux_loss_module functionality to train GAIL
 use_gail: True

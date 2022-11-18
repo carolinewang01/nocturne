@@ -22,7 +22,7 @@ single_agent_mode: False
 # all goals are achievable within 90 steps
 episode_length: 80
 # how many files of the total dataset to use. -1 indicates to use all of them
-num_files: -1
+num_files: 1
 scenario_path:  ${oc.env:PROCESSED_TRAIN_NO_TL}
 dt: 0.1
 sims_per_step: 10
@@ -37,7 +37,7 @@ steering_discretization: 21
 head_angle_lower_bound: -1.6
 head_angle_upper_bound: 1.6
 head_angle_discretization: 5
-max_num_vehicles: 5 # we want to upper bound how many controllable agents there can be in the scene
+max_num_vehicles: 1 # 5 # we want to upper bound how many controllable agents there can be in the scene
                      # this is mostly useful because RL libraries expect it
                      # rest are set to experts
 # TODO(eugenevinitsky) actually implement this

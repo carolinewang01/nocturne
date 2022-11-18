@@ -20,6 +20,8 @@ import wandb
 
 from examples.sample_factory_files.waymo_data_loader_wObj import WaymoDataset
 # from examples.imitation_learning.waymo_data_loader_wObj import WaymoDataset
+from nocturne.envs.wrappers import create_env
+
 import time
 
 
@@ -41,7 +43,7 @@ def main(cfg):
 
         def __init__(self, adict):
             self.__dict__.update(adict)
-
+    cfg_dict = cfg
     cfg = Bunch(cfg)
 
     set_seed_everywhere(cfg.seed)
@@ -63,7 +65,7 @@ def main(cfg):
     
     dataset = WaymoDataset(
         data_path=cfg.scenario_path,
-        file_limit=100, # cfg.num_files,
+        file_limit=1, # cfg.num_files,
         dataloader_config=dataloader_cfg,
         scenario_config=scenario_cfg,
         to_gpu=True,
@@ -78,7 +80,7 @@ def main(cfg):
             pin_memory=False,
         ))
 
-    obj, sample_state = next(data_loader)
+    # obj, sample_state = next(data_loader)
     '''
     With new dataloader: 
     100 files
@@ -86,19 +88,25 @@ def main(cfg):
     States size: 2431733328 bytes, 2.43 gB
     Actions size 5249268 bytes, 0.005 gB
     '''
-    import sys; sys.exit(0)
+    # import sys; sys.exit(0)
     start = time.time()
-    for i in range(100):
+    for i in range(1):
         print("GENERATING NEXT EXAMPLE")
-        obj, sample_state, sample_action = next(data_loader)
+        obj, sample_state = next(data_loader)
+        import pdb; pdb.set_trace()
     end = time.time()
     print("AVG TIME TO SAMPLE BATCH ", (end - start)/100) 
     '''
      .30 seconds for old dataloader 
      .023 seconds for new dataloader
     '''
-    print(sample_state.shape, sample_action.shape)
+    print(sample_state.shape)
+
+    env = create_env(cfg_dict)
+    env.reset()
+    env.reset()
 
 if __name__ == '__main__':
     config_path="../../cfgs/config.yaml"
+
     main()
